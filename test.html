@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive 3D Scene with Light and Objects</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/controls/OrbitControls.js"></script>
+    
+    <script>
+        let camera, scene, renderer, controls, group;
+
+        function init() {
+            // Create scene
+            scene = new THREE.Scene();
+
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(10, 10, 40); // Set a better initial camera position
+
+            // Create a group to hold all objects
+            group = new THREE.Group();
+            scene.add(group);
+
+            // Create renderer
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Create a blue sphere with radius 2 at (2, 32, 32)
+            const blueSphereGeometry = new THREE.SphereGeometry(2, 32, 32);
+            const blueSphereMaterial = new THREE.MeshPhongMaterial({ color: 0x0000ff });
+            const blueSphere = new THREE.Mesh(blueSphereGeometry, blueSphereMaterial);
+            blueSphere.position.set(2, 32, 32);
+            group.add(blueSphere); // Add to group
+
+            // Create a half-transparent red sphere to indicate light source
+            const lightIndicatorGeometry = new THREE.SphereGeometry(5, 16, 16);
+            const lightIndicatorMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.5 });
+            const lightIndicator = new THREE.Mesh(lightIndicatorGeometry, lightIndicatorMaterial);
+            lightIndicator.position.set(0, 1, 0); // Position at the light source
+            group.add(lightIndicator); // Add to group
+
+            // Create the light
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(0, 1, 0);
+            scene.add(light); // Add light to scene
+
+            // Move the white sphere to (5, -32, -32)
+            const whiteSphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+            const whiteSphereMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+            const whiteSphere = new THREE.Mesh(whiteSphereGeometry, whiteSphereMaterial);
+            whiteSphere.position.set(5, -32, -32);
+            group.add(whiteSphere); // Add to group
+
+            // Create a small cube to indicate the camera position
+            const cameraIndicatorGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const cameraIndicatorMaterial = new THREE.MeshBasicMaterial({ color: 0x888888 });
+            const cameraIndicator = new THREE.Mesh(cameraIndicatorGeometry, cameraIndicatorMaterial);
+            cameraIndicator.position.copy(camera.position); // Position it at the camera
+            group.add(cameraIndicator); // Add to group
+
+            // Create ambient light
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+
+            // OrbitControls for rotating, zooming, and panning
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;  // Smooth camera controls
+            controls.dampingFactor = 0.25;
+
+            // Add event listener for dragging the whole group
+            let dragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            // Mouse down event to start dragging
+            window.addEventListener('mousedown', (event) => {
+                dragging = true;
+                previousMousePosition = { x: event.clientX, y: event.clientY };
+            });
+
+            // Mouse move event to drag the group
+            window.addEventListener('mousemove', (event) => {
+                if (dragging) {
+                    const deltaMove = {
+                        x: event.clientX - previousMousePosition.x,
+                        y: event.clientY - previousMousePosition.y,
+                    };
+
+                    // Move the group based on mouse movement
+                    group.position.x += deltaMove.x * 0.01;
+                    group.position.y -= deltaMove.y * 0.01; // Inverted Y axis for intuitive dragging
+                    previousMousePosition = { x: event.clientX, y: event.clientY };
+                }
+            });
+
+            // Mouse up event to stop dragging
+            window.addEventListener('mouseup', () => {
+                dragging = false;
+            });
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();  // Update the camera controls
+                renderer.render(scene, camera);
+            }
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+            });
+
+            animate(); // Start animation loop
+        }
+
+        // Initialize the scene
+        init();
+    </script>
+</body>
+</html>
+
+

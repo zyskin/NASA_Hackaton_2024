@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive 3D Scene - Project 1 and Project 2</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        function init() {
+            // Create scene
+            const scene = new THREE.Scene();
+
+            // Create camera
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 40;
+
+            // Create renderer
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Create a group for all objects (Project 1 + Project 2)
+            const group = new THREE.Group();
+            scene.add(group);
+
+            // Project 1 - Blue, White, and Transparent Red spheres
+            // Blue sphere at (2, 32, 32) with radius 2
+            const blueSphereGeometry = new THREE.SphereGeometry(2, 32, 32);
+            const blueSphereMaterial = new THREE.MeshPhongMaterial({ color: 0x0000ff });
+            const blueSphere = new THREE.Mesh(blueSphereGeometry, blueSphereMaterial);
+            blueSphere.position.set(2, 32, 32);
+            group.add(blueSphere);
+
+            // White sphere at (5, -32, -32) with radius 1
+            const whiteSphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+            const whiteSphereMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+            const whiteSphere = new THREE.Mesh(whiteSphereGeometry, whiteSphereMaterial);
+            whiteSphere.position.set(5, -32, -32);
+            group.add(whiteSphere);
+
+            // Half-transparent red sphere for light source indication, centered at (0, 1, 0), radius 5
+            const lightIndicatorGeometry = new THREE.SphereGeometry(5, 16, 16);
+            const lightIndicatorMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.5 });
+            const lightIndicator = new THREE.Mesh(lightIndicatorGeometry, lightIndicatorMaterial);
+            lightIndicator.position.set(0, 1, 0);
+            group.add(lightIndicator);
+
+            // Add directional light
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(0, 1, 0);
+            group.add(light);
+
+            // Project 2 - Adding more spheres from .txt data
+            // Simulate reading from file and create new spheres
+            const spheresData = [
+                { name: 'sphere1', x: 1.0, y: 2.0, z: 3.0, r: 1.0 },  // You can replace this with the actual file data
+                { name: 'sphere2', x: 4.5, y: 5.6, z: 6.7, r: 2.0 }
+            ];
+
+            spheresData.forEach(data => {
+                const sphereGeometry = new THREE.SphereGeometry(data.r, 32, 32);
+                const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                sphere.position.set(data.x, data.y, data.z);
+                group.add(sphere);
+            });
+
+            // OrbitControls for interactivity (including translation)
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.25;
+            controls.enablePan = true;  // Enable translation (panning)
+            controls.screenSpacePanning = true; // Allow for screen space translation
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();  // Update the camera controls
+                renderer.render(scene, camera);
+            }
+
+            // Handle window resize
+            window.addEventListener('resize', function () {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+            });
+
+            animate();  // Start animation loop
+        }
+
+        // Initialize the scene
+        init();
+    </script>
+</body>
+</html>
